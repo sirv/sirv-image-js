@@ -1,0 +1,15 @@
+{
+  "name": "@sirv/js-sdk",
+  "version": "2.0.0",
+  "description": "Sirv SDK for building image URLs, responsive srcsets, and viewer HTML tags",
+  "main": "src/sirv-client.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": ["sirv", "image", "cdn", "srcset", "responsive", "zoom", "spin", "360", "gallery", "3d"],
+  "author": "Sirv",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
