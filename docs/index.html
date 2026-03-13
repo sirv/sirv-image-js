@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SirvImage JavaScript SDK Documentation</title>
+    <title>Sirv JavaScript SDK Documentation</title>
     <style>
         :root {
             --primary-color: #327bba;
@@ -12,9 +12,6 @@
             --text-color: #333;
             --code-bg: #f4f4f4;
             --border-color: #e1e4e8;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
         }
 
         a { color: var(--primary-color); }
@@ -58,12 +55,12 @@
 <body>
     <header>
         <div class="container">
-            <h1>SirvImage JavaScript SDK</h1>
-            <p>Fluent URL builder for Sirv dynamic image transformations</p>
+            <h1>Sirv JavaScript SDK</h1>
+            <p>Build Sirv image URLs, responsive srcsets, and HTML viewer tags</p>
             <div class="badges">
                 <span class="badge">Node.js 14+</span>
                 <span class="badge">MIT License</span>
-                <span class="badge">v1.0.0</span>
+                <span class="badge">v2.0.0</span>
             </div>
         </div>
     </header>
@@ -73,16 +70,15 @@
             <li><a href="#installation">Installation</a></li>
             <li><a href="#quickstart">Quick Start</a></li>
             <li><a href="#constructor">Constructor</a></li>
-            <li><a href="#resize">Resize</a></li>
-            <li><a href="#crop">Crop</a></li>
-            <li><a href="#rotation">Rotation</a></li>
-            <li><a href="#format">Format</a></li>
-            <li><a href="#color">Color</a></li>
-            <li><a href="#effects">Effects</a></li>
-            <li><a href="#text">Text</a></li>
-            <li><a href="#watermark">Watermark</a></li>
-            <li><a href="#canvas">Canvas</a></li>
-            <li><a href="#frame">Frame</a></li>
+            <li><a href="#url">url()</a></li>
+            <li><a href="#srcset">srcSet()</a></li>
+            <li><a href="#image">image()</a></li>
+            <li><a href="#zoom">zoom()</a></li>
+            <li><a href="#spin">spin()</a></li>
+            <li><a href="#video">video()</a></li>
+            <li><a href="#model">model()</a></li>
+            <li><a href="#gallery">gallery()</a></li>
+            <li><a href="#scripttag">scriptTag()</a></li>
             <li><a href="#examples">Examples</a></li>
         </ul>
     </nav>
@@ -92,244 +88,260 @@
 
             <section id="installation">
                 <h2>Installation</h2>
-                <pre><code>npm install sirv-image</code></pre>
-                <pre><code><span class="keyword">const</span> SirvImage = <span class="function">require</span>(<span class="string">'sirv-image'</span>);</code></pre>
+                <pre><code>npm install @sirv/js-sdk</code></pre>
+                <pre><code><span class="keyword">const</span> { SirvClient } = <span class="function">require</span>(<span class="string">'@sirv/js-sdk'</span>);</code></pre>
             </section>
 
             <section id="quickstart">
                 <h2>Quick Start</h2>
-                <pre><code><span class="keyword">const</span> <span class="variable">url</span> = <span class="keyword">new</span> <span class="function">SirvImage</span>(<span class="string">'https://demo.sirv.com/image.jpg'</span>)
-  .<span class="function">resize</span>({ width: 300, height: 200 })
-  .<span class="function">quality</span>(80)
-  .<span class="function">format</span>(<span class="string">'webp'</span>)
-  .<span class="function">toUrl</span>();
-<span class="comment">// https://demo.sirv.com/image.jpg?w=300&amp;h=200&amp;q=80&amp;format=webp</span></code></pre>
+                <pre><code><span class="keyword">const</span> { SirvClient } = <span class="function">require</span>(<span class="string">'@sirv/js-sdk'</span>);
+
+<span class="keyword">const</span> <span class="variable">sirv</span> = <span class="keyword">new</span> <span class="function">SirvClient</span>({ domain: <span class="string">'demo.sirv.com'</span>, defaults: { q: 80 } });
+
+<span class="comment">// Build a URL</span>
+<span class="variable">sirv</span>.<span class="function">url</span>(<span class="string">'/image.jpg'</span>, { w: 300, h: 200, format: <span class="string">'webp'</span> });
+<span class="comment">// =&gt; https://demo.sirv.com/image.jpg?q=80&amp;w=300&amp;h=200&amp;format=webp</span>
+
+<span class="comment">// Generate an image tag</span>
+<span class="variable">sirv</span>.<span class="function">image</span>(<span class="string">'/photo.jpg'</span>, { alt: <span class="string">'A photo'</span> });
+<span class="comment">// =&gt; &lt;img class="Sirv" data-src="https://demo.sirv.com/photo.jpg" alt="A photo"&gt;</span>
+
+<span class="comment">// Generate a script tag</span>
+<span class="variable">sirv</span>.<span class="function">scriptTag</span>({ modules: [<span class="string">'spin'</span>, <span class="string">'zoom'</span>] });
+<span class="comment">// =&gt; &lt;script src="https://scripts.sirv.com/sirvjs/v3/sirv.spin.zoom.js" async&gt;&lt;/script&gt;</span></code></pre>
             </section>
 
             <section id="constructor">
                 <h2>Constructor</h2>
-                <h4>new SirvImage(urlOrBase, path?)</h4>
-                <table>
-                    <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>urlOrBase</code></td><td>string</td><td>Full image URL or base URL</td></tr>
-                        <tr><td><code>path</code></td><td>string?</td><td>Image path (when using base URL)</td></tr>
-                    </tbody>
-                </table>
-                <pre><code><span class="keyword">const</span> <span class="variable">img1</span> = <span class="keyword">new</span> <span class="function">SirvImage</span>(<span class="string">'https://demo.sirv.com/image.jpg'</span>);
-<span class="keyword">const</span> <span class="variable">img2</span> = <span class="keyword">new</span> <span class="function">SirvImage</span>(<span class="string">'https://demo.sirv.com'</span>, <span class="string">'/image.jpg'</span>);</code></pre>
-            </section>
-
-            <section id="resize">
-                <h2>Resize</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>resize({ width, height, option })</code></td><td>Set dimensions and scale option (fit, fill, ignore, noup)</td></tr>
-                        <tr><td><code>width(w)</code></td><td>Set width in pixels</td></tr>
-                        <tr><td><code>height(h)</code></td><td>Set height in pixels</td></tr>
-                        <tr><td><code>scaleByLongest(s)</code></td><td>Resize by longest dimension</td></tr>
-                        <tr><td><code>thumbnail(size = 256)</code></td><td>Create a square thumbnail</td></tr>
-                    </tbody>
-                </table>
-                <pre><code><span class="variable">img</span>.<span class="function">resize</span>({ width: 400, height: 300, option: <span class="string">'fill'</span> })</code></pre>
-            </section>
-
-            <section id="crop">
-                <h2>Crop</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>crop({ width, height, x, y, type, padWidth, padHeight })</code></td><td>Crop with optional type and padding</td></tr>
-                        <tr><td><code>clipPath(name)</code></td><td>Apply a Photoshop clipping path</td></tr>
-                    </tbody>
-                </table>
-                <pre><code><span class="variable">img</span>.<span class="function">crop</span>({ width: 200, height: 150, x: 10, y: 20 })
-<span class="variable">img</span>.<span class="function">crop</span>({ type: <span class="string">'face'</span>, padWidth: 50 })</code></pre>
-            </section>
-
-            <section id="rotation">
-                <h2>Rotation</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>rotate(degrees)</code></td><td>Rotate the image (-180 to 180)</td></tr>
-                        <tr><td><code>flip()</code></td><td>Flip vertically</td></tr>
-                        <tr><td><code>flop()</code></td><td>Flip horizontally</td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="format">
-                <h2>Format &amp; Quality</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>format(fmt)</code></td><td>Set output format: jpg, png, webp, optimal, original</td></tr>
-                        <tr><td><code>quality(q)</code></td><td>Set JPEG quality (0-100)</td></tr>
-                        <tr><td><code>webpFallback(fmt)</code></td><td>Set WebP fallback format</td></tr>
-                        <tr><td><code>subsampling(value)</code></td><td>Set chroma subsampling: 4:4:4, 4:2:2, 4:2:0</td></tr>
-                        <tr><td><code>pngOptimize(enabled = true)</code></td><td>Enable PNG optimization</td></tr>
-                        <tr><td><code>gifLossy(level)</code></td><td>Set GIF lossy compression (0-100)</td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="color">
-                <h2>Color Adjustments</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>brightness(v)</code></td><td>Adjust brightness (-100 to 100)</td></tr>
-                        <tr><td><code>contrast(v)</code></td><td>Adjust contrast (-100 to 100)</td></tr>
-                        <tr><td><code>exposure(v)</code></td><td>Adjust exposure (-100 to 100)</td></tr>
-                        <tr><td><code>hue(v)</code></td><td>Adjust hue (-100 to 100)</td></tr>
-                        <tr><td><code>saturation(v)</code></td><td>Adjust saturation (-100 to 100)</td></tr>
-                        <tr><td><code>lightness(v)</code></td><td>Adjust lightness (-100 to 100)</td></tr>
-                        <tr><td><code>shadows(v)</code></td><td>Adjust shadows (-100 to 100)</td></tr>
-                        <tr><td><code>highlights(v)</code></td><td>Adjust highlights (-100 to 100)</td></tr>
-                        <tr><td><code>grayscale()</code></td><td>Convert to grayscale</td></tr>
-                        <tr><td><code>colorLevel({ black, white })</code></td><td>Set color levels (black: 0-254, white: 1-255)</td></tr>
-                        <tr><td><code>histogram(channel)</code></td><td>Display color histogram: r, g, b</td></tr>
-                    </tbody>
-                </table>
-
-                <h3>Color Effects</h3>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>colorize({ color, opacity })</code></td><td>Apply color overlay</td></tr>
-                        <tr><td><code>colortone(presetOrOptions)</code></td><td>Apply a color tone preset or custom settings</td></tr>
-                    </tbody>
-                </table>
-                <pre><code><span class="variable">img</span>.<span class="function">colortone</span>(<span class="string">'sepia'</span>)
-<span class="variable">img</span>.<span class="function">colortone</span>({ color: <span class="string">'ff5500'</span>, level: 80, mode: <span class="string">'highlights'</span> })</code></pre>
-            </section>
-
-            <section id="effects">
-                <h2>Effects</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>blur(v)</code></td><td>Apply blur (0-100)</td></tr>
-                        <tr><td><code>sharpen(v)</code></td><td>Apply sharpening (0-100)</td></tr>
-                        <tr><td><code>vignette({ value, color })</code></td><td>Apply vignette effect</td></tr>
-                        <tr><td><code>opacity(v)</code></td><td>Set image opacity (0-100, PNG only)</td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section id="text">
-                <h2>Text Overlay</h2>
-                <h4>text(content, options?)</h4>
-                <p>Add a text overlay. Call multiple times for multiple layers (auto-indexed).</p>
+                <h4>new SirvClient(options)</h4>
                 <table>
                     <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code>size</code></td><td>number</td><td>Text area width %</td></tr>
-                        <tr><td><code>fontSize</code></td><td>number</td><td>Font size in px</td></tr>
-                        <tr><td><code>fontFamily</code></td><td>string</td><td>Google Fonts family</td></tr>
-                        <tr><td><code>fontStyle</code></td><td>string</td><td>normal, italic</td></tr>
-                        <tr><td><code>fontWeight</code></td><td>string|number</td><td>300-800</td></tr>
-                        <tr><td><code>color</code></td><td>string</td><td>Text color</td></tr>
-                        <tr><td><code>opacity</code></td><td>number</td><td>0-100</td></tr>
-                        <tr><td><code>outlineWidth</code></td><td>number</td><td>Outline width px</td></tr>
-                        <tr><td><code>outlineColor</code></td><td>string</td><td>Outline color</td></tr>
-                        <tr><td><code>backgroundColor</code></td><td>string</td><td>Background color</td></tr>
-                        <tr><td><code>backgroundOpacity</code></td><td>number</td><td>Background opacity</td></tr>
-                        <tr><td><code>align</code></td><td>string</td><td>left, center, right</td></tr>
-                        <tr><td><code>position</code></td><td>string</td><td>center, north, south, etc.</td></tr>
-                        <tr><td><code>positionX</code></td><td>string|number</td><td>X offset</td></tr>
-                        <tr><td><code>positionY</code></td><td>string|number</td><td>Y offset</td></tr>
+                        <tr><td><code>domain</code></td><td>string</td><td><strong>Required.</strong> Sirv domain (e.g. <code>'demo.sirv.com'</code>)</td></tr>
+                        <tr><td><code>defaults</code></td><td>Object</td><td>Default query parameters merged into every URL</td></tr>
                     </tbody>
                 </table>
-                <pre><code><span class="variable">img</span>.<span class="function">text</span>(<span class="string">'Hello'</span>, { color: <span class="string">'white'</span>, fontSize: 24, position: <span class="string">'center'</span> })
-   .<span class="function">text</span>(<span class="string">'World'</span>, { position: <span class="string">'south'</span> }) <span class="comment">// second text layer</span></code></pre>
-            </section>
-
-            <section id="watermark">
-                <h2>Watermark</h2>
-                <h4>watermark(path, options?)</h4>
-                <p>Add a watermark overlay. Call multiple times for multiple watermarks.</p>
-                <table>
-                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>position</code></td><td>string</td><td>center, north, tile, etc.</td></tr>
-                        <tr><td><code>positionX</code></td><td>string|number</td><td>X offset</td></tr>
-                        <tr><td><code>positionY</code></td><td>string|number</td><td>Y offset</td></tr>
-                        <tr><td><code>scaleWidth</code></td><td>string|number</td><td>Width (px or %)</td></tr>
-                        <tr><td><code>scaleHeight</code></td><td>string|number</td><td>Height (px or %)</td></tr>
-                        <tr><td><code>scaleOption</code></td><td>string</td><td>noup, fit, fill, ignore</td></tr>
-                        <tr><td><code>rotate</code></td><td>number</td><td>-180 to 180</td></tr>
-                        <tr><td><code>opacity</code></td><td>number</td><td>0-100</td></tr>
-                        <tr><td><code>layer</code></td><td>string</td><td>front, back</td></tr>
-                    </tbody>
-                </table>
-                <pre><code><span class="variable">img</span>.<span class="function">watermark</span>(<span class="string">'/wm.png'</span>, { position: <span class="string">'center'</span>, opacity: 50 })</code></pre>
-            </section>
-
-            <section id="canvas">
-                <h2>Canvas</h2>
-                <h4>canvas({ width, height, color, position, opacity, aspectRatio, borderWidth, borderHeight, borderColor, borderOpacity })</h4>
-                <p>Configure canvas settings.</p>
-                <pre><code><span class="variable">img</span>.<span class="function">canvas</span>({ width: 800, height: 600, color: <span class="string">'ffffff'</span> })
-<span class="variable">img</span>.<span class="function">canvas</span>({ aspectRatio: <span class="string">'16:9'</span> })
-<span class="variable">img</span>.<span class="function">canvas</span>({ borderWidth: 10, borderColor: <span class="string">'000000'</span> })</code></pre>
-            </section>
-
-            <section id="frame">
-                <h2>Frame</h2>
-                <h4>frame({ style, color, width, rimColor, rimWidth })</h4>
-                <p>Add a frame. Styles: solid, mirror, edge, dither, none.</p>
-                <pre><code><span class="variable">img</span>.<span class="function">frame</span>({ style: <span class="string">'solid'</span>, color: <span class="string">'333333'</span>, width: 5 })</code></pre>
-            </section>
-
-            <section id="other">
-                <h2>Other</h2>
-                <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
-                    <tbody>
-                        <tr><td><code>page(num)</code></td><td>Select a PDF page to render</td></tr>
-                        <tr><td><code>profile(name)</code></td><td>Apply a saved transformation profile</td></tr>
-                    </tbody>
-                </table>
+                <pre><code><span class="keyword">const</span> <span class="variable">sirv</span> = <span class="keyword">new</span> <span class="function">SirvClient</span>({
+  domain: <span class="string">'demo.sirv.com'</span>,
+  defaults: { q: 80 }
+});</code></pre>
             </section>
 
             <section id="url">
-                <h2>URL Generation</h2>
+                <h2>url(path, params?)</h2>
+                <p>Build a full Sirv URL. Nested objects are flattened to dot-notation query parameters. Default parameters are merged with the provided params.</p>
                 <table>
-                    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+                    <thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code>toUrl()</code></td><td>Build and return the final URL string</td></tr>
-                        <tr><td><code>toString()</code></td><td>Alias for toUrl(). Enables template literal usage</td></tr>
+                        <tr><td><code>path</code></td><td>string</td><td>Asset path (e.g. <code>'/image.jpg'</code>)</td></tr>
+                        <tr><td><code>params</code></td><td>Object</td><td>Transformation parameters (nested objects are flattened)</td></tr>
                     </tbody>
                 </table>
-                <pre><code><span class="keyword">const</span> <span class="variable">url</span> = <span class="variable">img</span>.<span class="function">toUrl</span>();
-console.<span class="function">log</span>(<span class="string">`Image: ${img}`</span>);</code></pre>
+                <pre><code><span class="comment">// Simple params</span>
+<span class="variable">sirv</span>.<span class="function">url</span>(<span class="string">'/image.jpg'</span>, { w: 300, h: 200, format: <span class="string">'webp'</span> });
+<span class="comment">// =&gt; https://demo.sirv.com/image.jpg?q=80&amp;w=300&amp;h=200&amp;format=webp</span>
+
+<span class="comment">// Nested params flatten to dot-notation</span>
+<span class="variable">sirv</span>.<span class="function">url</span>(<span class="string">'/image.jpg'</span>, { crop: { type: <span class="string">'face'</span>, pad: { width: 10, height: 10 } } });
+<span class="comment">// =&gt; ...?q=80&amp;crop.type=face&amp;crop.pad.width=10&amp;crop.pad.height=10</span>
+
+<span class="comment">// Params override defaults</span>
+<span class="variable">sirv</span>.<span class="function">url</span>(<span class="string">'/image.jpg'</span>, { q: 90 });
+<span class="comment">// =&gt; https://demo.sirv.com/image.jpg?q=90</span></code></pre>
+            </section>
+
+            <section id="srcset">
+                <h2>srcSet(path, params?, options?)</h2>
+                <p>Generate a <code>srcset</code> string for responsive images. Supports three modes:</p>
+
+                <h3>Explicit widths</h3>
+                <pre><code><span class="variable">sirv</span>.<span class="function">srcSet</span>(<span class="string">'/image.jpg'</span>, { format: <span class="string">'webp'</span> }, { widths: [320, 640, 960, 1280, 1920] });
+<span class="comment">// =&gt; https://demo.sirv.com/image.jpg?q=80&amp;format=webp&amp;w=320 320w,
+//    https://demo.sirv.com/image.jpg?q=80&amp;format=webp&amp;w=640 640w, ...</span></code></pre>
+
+                <h3>Auto-generated widths (tolerance)</h3>
+                <p>Generates widths between <code>minWidth</code> and <code>maxWidth</code>, stepping by <code>current *= 1 + tolerance * 2</code>.</p>
+                <pre><code><span class="variable">sirv</span>.<span class="function">srcSet</span>(<span class="string">'/image.jpg'</span>, { format: <span class="string">'webp'</span> }, {
+  minWidth: 200, maxWidth: 2000, tolerance: 0.15
+});</code></pre>
+
+                <h3>Device pixel ratios (DPR)</h3>
+                <p>Generates DPR variants with automatic variable quality: <code>q = round(baseQ &times; 0.75<sup>(dpr-1)</sup>)</code>. Width and height are multiplied by the DPR.</p>
+                <pre><code><span class="variable">sirv</span>.<span class="function">srcSet</span>(<span class="string">'/hero.jpg'</span>, { w: 600, h: 400 }, { devicePixelRatios: [1, 2, 3] });
+<span class="comment">// 1x: q=80, w=600, h=400
+// 2x: q=60, w=1200, h=800
+// 3x: q=45, w=1800, h=1200</span></code></pre>
+
+                <table>
+                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>widths</code></td><td>number[]</td><td>Explicit list of widths</td></tr>
+                        <tr><td><code>minWidth</code></td><td>number</td><td>Minimum width for auto-generation</td></tr>
+                        <tr><td><code>maxWidth</code></td><td>number</td><td>Maximum width for auto-generation</td></tr>
+                        <tr><td><code>tolerance</code></td><td>number</td><td>Step tolerance (default 0.15)</td></tr>
+                        <tr><td><code>devicePixelRatios</code></td><td>number[]</td><td>DPR values (e.g. <code>[1, 2, 3]</code>)</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="image">
+                <h2>image(path, options?)</h2>
+                <p>Generate an <code>&lt;img&gt;</code> tag for a Sirv image with <code>class="Sirv"</code> and <code>data-src</code>.</p>
+                <table>
+                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>transform</code></td><td>Object</td><td>Transformation parameters for the URL</td></tr>
+                        <tr><td><code>viewer</code></td><td>Object</td><td>Viewer options (serialized to <code>data-options</code>)</td></tr>
+                        <tr><td><code>alt</code></td><td>string</td><td>Alt text</td></tr>
+                        <tr><td><code>className</code></td><td>string</td><td>Additional CSS class(es)</td></tr>
+                    </tbody>
+                </table>
+                <pre><code><span class="variable">sirv</span>.<span class="function">image</span>(<span class="string">'/tomatoes.jpg'</span>, { alt: <span class="string">'Fresh tomatoes'</span> });
+<span class="comment">// =&gt; &lt;img class="Sirv" data-src="https://demo.sirv.com/tomatoes.jpg" alt="Fresh tomatoes"&gt;</span>
+
+<span class="variable">sirv</span>.<span class="function">image</span>(<span class="string">'/photo.jpg'</span>, {
+  transform: { w: 800, format: <span class="string">'webp'</span> },
+  viewer: { autostart: <span class="string">'visible'</span>, threshold: 200 },
+  className: <span class="string">'hero-image'</span>
+});
+<span class="comment">// =&gt; &lt;img class="Sirv hero-image" data-src="...?q=80&amp;w=800&amp;format=webp"
+//        data-options="autostart:visible;threshold:200"&gt;</span></code></pre>
+            </section>
+
+            <section id="zoom">
+                <h2>zoom(path, options?)</h2>
+                <p>Generate a <code>&lt;div&gt;</code> tag for a Sirv zoom viewer with <code>data-type="zoom"</code>.</p>
+                <table>
+                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>transform</code></td><td>Object</td><td>Transformation parameters</td></tr>
+                        <tr><td><code>viewer</code></td><td>Object</td><td>Viewer options</td></tr>
+                        <tr><td><code>className</code></td><td>string</td><td>Additional CSS class(es)</td></tr>
+                    </tbody>
+                </table>
+                <pre><code><span class="variable">sirv</span>.<span class="function">zoom</span>(<span class="string">'/product.jpg'</span>);
+<span class="comment">// =&gt; &lt;div class="Sirv" data-src="https://demo.sirv.com/product.jpg" data-type="zoom"&gt;&lt;/div&gt;</span>
+
+<span class="variable">sirv</span>.<span class="function">zoom</span>(<span class="string">'/product.jpg'</span>, { viewer: { mode: <span class="string">'deep'</span>, wheel: <span class="keyword">false</span> } });
+<span class="comment">// =&gt; &lt;div ... data-type="zoom" data-options="mode:deep;wheel:false"&gt;&lt;/div&gt;</span></code></pre>
+            </section>
+
+            <section id="spin">
+                <h2>spin(path, options?)</h2>
+                <p>Generate a <code>&lt;div&gt;</code> tag for a Sirv 360 spin viewer. No <code>data-type</code> attribute is added (Sirv JS auto-detects <code>.spin</code> files).</p>
+                <table>
+                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>viewer</code></td><td>Object</td><td>Viewer options</td></tr>
+                        <tr><td><code>className</code></td><td>string</td><td>Additional CSS class(es)</td></tr>
+                    </tbody>
+                </table>
+                <pre><code><span class="variable">sirv</span>.<span class="function">spin</span>(<span class="string">'/product.spin'</span>);
+<span class="comment">// =&gt; &lt;div class="Sirv" data-src="https://demo.sirv.com/product.spin"&gt;&lt;/div&gt;</span>
+
+<span class="variable">sirv</span>.<span class="function">spin</span>(<span class="string">'/product.spin'</span>, { viewer: { autostart: <span class="string">'visible'</span>, autospin: <span class="string">'lazy'</span> } });</code></pre>
+            </section>
+
+            <section id="video">
+                <h2>video(path, options?)</h2>
+                <p>Generate a <code>&lt;div&gt;</code> tag for a Sirv video.</p>
+                <pre><code><span class="variable">sirv</span>.<span class="function">video</span>(<span class="string">'/clip.mp4'</span>);
+<span class="comment">// =&gt; &lt;div class="Sirv" data-src="https://demo.sirv.com/clip.mp4"&gt;&lt;/div&gt;</span></code></pre>
+            </section>
+
+            <section id="model">
+                <h2>model(path, options?)</h2>
+                <p>Generate a <code>&lt;div&gt;</code> tag for a Sirv 3D model viewer.</p>
+                <pre><code><span class="variable">sirv</span>.<span class="function">model</span>(<span class="string">'/shoe.glb'</span>);
+<span class="comment">// =&gt; &lt;div class="Sirv" data-src="https://demo.sirv.com/shoe.glb"&gt;&lt;/div&gt;</span></code></pre>
+            </section>
+
+            <section id="gallery">
+                <h2>gallery(items, options?)</h2>
+                <p>Generate a gallery container with multiple asset divs. Each item can have its own type, transform params, and viewer options. Gallery-level viewer options apply to the container.</p>
+                <h4>Item properties</h4>
+                <table>
+                    <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>src</code></td><td>string</td><td><strong>Required.</strong> Asset path</td></tr>
+                        <tr><td><code>type</code></td><td>string</td><td>Asset type override (e.g. <code>'zoom'</code>)</td></tr>
+                        <tr><td><code>transform</code></td><td>Object</td><td>Per-item transformation params</td></tr>
+                        <tr><td><code>viewer</code></td><td>Object</td><td>Per-item viewer options</td></tr>
+                    </tbody>
+                </table>
+                <h4>Gallery options</h4>
+                <table>
+                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>viewer</code></td><td>Object</td><td>Gallery-level viewer options</td></tr>
+                        <tr><td><code>className</code></td><td>string</td><td>Additional CSS class(es)</td></tr>
+                    </tbody>
+                </table>
+                <pre><code><span class="variable">sirv</span>.<span class="function">gallery</span>([
+  { src: <span class="string">'/product.spin'</span> },
+  { src: <span class="string">'/front.jpg'</span>, type: <span class="string">'zoom'</span> },
+  { src: <span class="string">'/side.jpg'</span>, type: <span class="string">'zoom'</span> },
+  { src: <span class="string">'/video.mp4'</span> }
+], {
+  viewer: { arrows: <span class="keyword">true</span>, thumbnails: <span class="string">'bottom'</span> }
+});
+<span class="comment">// =&gt; &lt;div class="Sirv" data-options="arrows:true;thumbnails:bottom"&gt;
+//      &lt;div data-src="https://demo.sirv.com/product.spin"&gt;&lt;/div&gt;
+//      &lt;div data-src="https://demo.sirv.com/front.jpg" data-type="zoom"&gt;&lt;/div&gt;
+//      &lt;div data-src="https://demo.sirv.com/side.jpg" data-type="zoom"&gt;&lt;/div&gt;
+//      &lt;div data-src="https://demo.sirv.com/video.mp4"&gt;&lt;/div&gt;
+//    &lt;/div&gt;</span></code></pre>
+            </section>
+
+            <section id="scripttag">
+                <h2>scriptTag(options?)</h2>
+                <p>Generate a <code>&lt;script&gt;</code> tag to load Sirv JS. Optionally specify modules to load only what you need.</p>
+                <table>
+                    <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>modules</code></td><td>string[]</td><td>Modules to load (e.g. <code>['spin', 'zoom']</code>)</td></tr>
+                        <tr><td><code>async</code></td><td>boolean</td><td>Add async attribute (default <code>true</code>)</td></tr>
+                    </tbody>
+                </table>
+                <pre><code><span class="variable">sirv</span>.<span class="function">scriptTag</span>();
+<span class="comment">// =&gt; &lt;script src="https://scripts.sirv.com/sirvjs/v3/sirv.js" async&gt;&lt;/script&gt;</span>
+
+<span class="variable">sirv</span>.<span class="function">scriptTag</span>({ modules: [<span class="string">'spin'</span>, <span class="string">'zoom'</span>] });
+<span class="comment">// =&gt; &lt;script src="https://scripts.sirv.com/sirvjs/v3/sirv.spin.zoom.js" async&gt;&lt;/script&gt;</span></code></pre>
             </section>
 
             <section id="examples">
                 <h2>Full Examples</h2>
-                <h3>E-commerce Product Image</h3>
-                <pre><code><span class="keyword">const</span> <span class="variable">url</span> = <span class="keyword">new</span> <span class="function">SirvImage</span>(<span class="string">'https://demo.sirv.com'</span>, <span class="string">'/product.jpg'</span>)
-  .<span class="function">resize</span>({ width: 800, option: <span class="string">'fill'</span> })
-  .<span class="function">crop</span>({ type: <span class="string">'face'</span> })
-  .<span class="function">format</span>(<span class="string">'webp'</span>)
-  .<span class="function">quality</span>(85)
-  .<span class="function">sharpen</span>(20)
-  .<span class="function">watermark</span>(<span class="string">'/logo.png'</span>, { position: <span class="string">'southeast'</span>, opacity: 40 })
-  .<span class="function">text</span>(<span class="string">'Sale!'</span>, { color: <span class="string">'red'</span>, fontSize: 32, position: <span class="string">'north'</span> })
-  .<span class="function">toUrl</span>();</code></pre>
 
-                <h3>Vintage Photo Effect</h3>
-                <pre><code><span class="keyword">const</span> <span class="variable">url</span> = <span class="keyword">new</span> <span class="function">SirvImage</span>(<span class="string">'https://demo.sirv.com/photo.jpg'</span>)
-  .<span class="function">resize</span>({ width: 600 })
-  .<span class="function">colortone</span>(<span class="string">'sepia'</span>)
-  .<span class="function">contrast</span>(10)
-  .<span class="function">vignette</span>({ value: 40 })
-  .<span class="function">frame</span>({ style: <span class="string">'solid'</span>, color: <span class="string">'333'</span>, width: 8 })
-  .<span class="function">quality</span>(90)
-  .<span class="function">toUrl</span>();</code></pre>
+                <h3>Responsive Product Page</h3>
+                <pre><code><span class="keyword">const</span> { SirvClient } = <span class="function">require</span>(<span class="string">'@sirv/js-sdk'</span>);
+<span class="keyword">const</span> <span class="variable">sirv</span> = <span class="keyword">new</span> <span class="function">SirvClient</span>({ domain: <span class="string">'mystore.sirv.com'</span>, defaults: { q: 80 } });
+
+<span class="comment">// Responsive image with srcset</span>
+<span class="keyword">const</span> <span class="variable">srcset</span> = <span class="variable">sirv</span>.<span class="function">srcSet</span>(<span class="string">'/hero.jpg'</span>, { format: <span class="string">'webp'</span> }, {
+  widths: [320, 640, 960, 1280, 1920]
+});
+console.<span class="function">log</span>(<span class="string">`&lt;img srcset="${srcset}" sizes="100vw"&gt;`</span>);
+
+<span class="comment">// Product gallery with zoom, spin, and video</span>
+<span class="keyword">const</span> <span class="variable">gallery</span> = <span class="variable">sirv</span>.<span class="function">gallery</span>([
+  { src: <span class="string">'/products/shoe.spin'</span> },
+  { src: <span class="string">'/products/shoe-front.jpg'</span>, type: <span class="string">'zoom'</span> },
+  { src: <span class="string">'/products/shoe-side.jpg'</span>, type: <span class="string">'zoom'</span> },
+  { src: <span class="string">'/products/shoe-video.mp4'</span> }
+], { viewer: { thumbnails: <span class="string">'bottom'</span> } });
+
+<span class="comment">// Load Sirv JS for spin + zoom</span>
+<span class="keyword">const</span> <span class="variable">script</span> = <span class="variable">sirv</span>.<span class="function">scriptTag</span>({ modules: [<span class="string">'spin'</span>, <span class="string">'zoom'</span>] });</code></pre>
+
+                <h3>Thumbnail Grid with Face Crop</h3>
+                <pre><code><span class="keyword">const</span> <span class="variable">images</span> = [<span class="string">'/team/alice.jpg'</span>, <span class="string">'/team/bob.jpg'</span>, <span class="string">'/team/carol.jpg'</span>];
+<span class="keyword">const</span> <span class="variable">html</span> = <span class="variable">images</span>.<span class="function">map</span>(<span class="variable">path</span> =&gt;
+  <span class="variable">sirv</span>.<span class="function">image</span>(<span class="variable">path</span>, {
+    transform: { w: 200, h: 200, crop: { type: <span class="string">'face'</span> } },
+    alt: <span class="variable">path</span>.<span class="function">split</span>(<span class="string">'/'</span>).<span class="function">pop</span>()
+  })
+).<span class="function">join</span>(<span class="string">'\n'</span>);</code></pre>
             </section>
 
         </div>
@@ -341,7 +353,7 @@ console.<span class="function">log</span>(<span class="string">`Image: ${img}`</
                 <a href="https://sirv.com/" target="_blank">Sirv Website</a> |
                 <a href="https://sirv.com/help/articles/dynamic-imaging/" target="_blank">Dynamic Imaging Docs</a> |
                 <a href="https://github.com/sirv/sirv-image-js" target="_blank">GitHub</a> |
-                <a href="https://www.npmjs.com/package/sirv-image" target="_blank">npm</a>
+                <a href="https://www.npmjs.com/package/@sirv/js-sdk" target="_blank">npm</a>
             </p>
             <p style="margin-top: 15px; color: #666;">
                 &copy;2026 Sirv Limited
