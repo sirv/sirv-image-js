@@ -1,14 +1,22 @@
 {
-  "name": "@sirv/js-sdk",
+  "name": "@sirv/sirv-image",
   "version": "2.0.0",
-  "description": "Sirv SDK for building image URLs, responsive srcsets, and viewer HTML tags",
+  "description": "Official JavaScript SDK for the Sirv dynamic imaging API. This SDK provides a simple way to request any modified image (dimensions, format, quality, sharpen, crop, watermark etc.) using the 100+ image transformation options in Sirv's image optimization service.",
   "main": "src/sirv-client.js",
   "scripts": {
     "test": "jest"
   },
-  "keywords": ["sirv", "image", "cdn", "srcset", "responsive", "zoom", "spin", "360", "gallery", "3d"],
+  "keywords": ["sirv", "image", "cdn", "srcset", "responsive", "zoom", "spin", "360", "gallery", "3d", "image-processing", "image-optimization", "image-transformation"],
   "author": "Sirv",
   "license": "MIT",
+  "homepage": "https://sirv.github.io/sirv-image-js/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sirv/sirv-image-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sirv/sirv-image-js/issues"
+  },
   "devDependencies": {
     "jest": "^29.0.0"
   }
